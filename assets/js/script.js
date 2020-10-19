@@ -84,7 +84,12 @@ const createTaskActions = (taskId) => {
 }
 
 const taskButtonHandler = (event) => {
-    if (event.target.matches(".delete-btn")) {
+    if ( event.target.matches(".edit-btn")) {
+        // Edit Button was clicked
+        let taskID = event.target.getAttribute("data-task-id");
+        editTask(taskId);
+        // Delete Button was clicked
+    } else if (event.target.matches(".delete-btn")) {
         let taskId = event.target.getAttribute("data-task-id");
         deleteTask(taskId);
     }
@@ -93,6 +98,13 @@ const taskButtonHandler = (event) => {
 const deleteTask = (taskId) => {
     let taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
     taskSelected.remove();
+}
+
+const editTask = (taskId) => {
+    console.log("Editing task #" + taskId);
+
+    // get a task list item element
+    let taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
 }
 
 formEl.addEventListener("submit", taskFormHandler);
