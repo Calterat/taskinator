@@ -86,7 +86,7 @@ const createTaskActions = (taskId) => {
 const taskButtonHandler = (event) => {
     if ( event.target.matches(".edit-btn")) {
         // Edit Button was clicked
-        let taskID = event.target.getAttribute("data-task-id");
+        let taskId = event.target.getAttribute("data-task-id");
         editTask(taskId);
         // Delete Button was clicked
     } else if (event.target.matches(".delete-btn")) {
@@ -101,10 +101,15 @@ const deleteTask = (taskId) => {
 }
 
 const editTask = (taskId) => {
-    console.log("Editing task #" + taskId);
-
     // get a task list item element
     let taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+    // get content from task name and type
+    let taskName = taskSelected.querySelector("h3.task-name").textContent;
+    let taskType = taskSelected.querySelector("span.task-type").textContent;
+    document.querySelector("input[name='task-name']").value = taskName;
+    document.querySelector("select[name='task-type']").value = taskType;
+    document.querySelector("#save-task").textContent = "Save Task";
+    formEl.setAttribute("data-task-id", taskId);
 }
 
 formEl.addEventListener("submit", taskFormHandler);
