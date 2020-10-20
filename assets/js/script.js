@@ -1,10 +1,10 @@
 const formEl = document.querySelector("#task-form");
 const tasksToDoEl = document.querySelector("#tasks-to-do");
-let taskIdCounter = 0
+let taskIdCounter = 0;
 const pageContentEl = document.querySelector("#page-content");
 const tasksInProgressEl = document.querySelector("#tasks-in-progress");
 const tasksCompletedEl = document.querySelector("#tasks-completed");
-
+let tasks = [];
 
 
 const taskFormHandler = (event) => {
@@ -22,12 +22,6 @@ const taskFormHandler = (event) => {
     // setting up conditional for task editing
     let isEdit = formEl.hasAttribute("data-task-id");
     
-    
-    // package up data as an object
-    let taskDataObj = {
-        name: taskNameInput,
-        type: taskTypeInput
-    };
     // has data attribute, so get task id and call function to complete edit process
     if (isEdit) {
         let taskId = formEl.getAttribute("data-task-id");
@@ -35,7 +29,8 @@ const taskFormHandler = (event) => {
     } else {
         let taskDataObj = {
             name: taskNameInput,
-            type: taskTypeInput
+            type: taskTypeInput,
+            status: "to do"
         }
         createTaskEl(taskDataObj);
     }
@@ -59,7 +54,13 @@ const createTaskEl = (taskDataObj) => {
         let taskActionsEl = createTaskActions(taskIdCounter);
         listItemsEl.appendChild(taskActionsEl);
         // add entire list item to list
-        tasksToDoEl.appendChild(listItemsEl);    
+        tasksToDoEl.appendChild(listItemsEl);
+        // add ID to task object
+        taskDataObj.id = taskIdCounter;
+        // push task object to tasks
+        tasks.push(taskDataObj);
+        // save to storage
+        saveTasks(); 
         // increase task counter for a unique ID
         taskIdCounter++;
 }
@@ -114,6 +115,20 @@ const taskButtonHandler = (event) => {
 const deleteTask = (taskId) => {
     let taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
     taskSelected.remove();
+
+    // create new array to hold updated list of tasks
+    let updatedTaskArr = [];
+
+    // loop through current tasks
+    for (i = 0; i < tasks.length; i++) {
+        // if tasks[i].id doesn't match the value of taskId, let's keep that task and push it into the new array
+        if (tasks[i].id !== parseInt(taskId)) {
+            updatedTaskArr.push(tasks[i]);
+        }
+    }
+    //reassign tasks array to be the same as updatedTaskArr
+    tasks = updatedTaskArr;
+    saveTasks();
 }
 
 const editTask = (taskId) => {
@@ -135,7 +150,14 @@ const completeEditTask = (taskName, taskType, taskId) => {
     // set new values
     taskSelected.querySelector("h3.task-name").textContent = taskName;
     taskSelected.querySelector("span.task-type").textContent = taskType;
-
+    // loop through tasks array and task object with new content
+    for (i = 0; i < tasks.length; i++) {
+        if (tasks[i].id === parseInt(taskID)) {
+            tasks[i].name = taskName;
+            tasks[i].type = taskType;
+        }
+    }
+    saveTasks();
     alert("Task Updated!");
     formEl.removeAttribute("data-task-id");
     document.querySelector("#save-task").textContent = "Add Task";
@@ -158,6 +180,13 @@ const taskStatusChangeHandler = (event) => {
     } else if (statusValue === "completed") {
         tasksCompletedEl.appendChild(taskSelected);
     }
+    //update tasks's status in tasks array
+    for (i = 0; i < tasks.length; i++) {
+        if (tasks[i].id === parseInt(taskId)) {
+            tasks[i].status = statusValue;
+        }
+    }
+    saveTasks();
 }
 
 const dragTaskHandler = (event) => {
@@ -191,6 +220,14 @@ const dropTaskHandler = (event) => {
     }
     dropZoneEl.appendChild(draggableElement);
     dropZoneEl.removeAttribute("style");
+
+    // loop through tasks array to find and update the updated task's status
+    for (i = 0; i < tasks.length; i++) {
+        if (tasks[i].id === parseInt(id)) {
+            tasks[i].status = statusSelectEl.value.toLowerCase();
+        }
+    }
+    saveTasks();
 }
 
 const dragLeaveHandler = (event) => {
@@ -198,6 +235,10 @@ const dragLeaveHandler = (event) => {
     if (taskListEl) {
         taskListEl.removeAttribute("style");
     }
+}
+
+const saveTasks = () => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
 // listens for a submit on the form element
