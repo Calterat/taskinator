@@ -47,6 +47,7 @@ const createTaskEl = (taskDataObj) => {
         listItemsEl.className = "task-item";
         // add a task ID as a custom attribute
         listItemsEl.setAttribute("data-task-id", taskIdCounter);
+        listItemsEl.setAttribute("draggable", "true");
         // create a div to hold task info and add to list item
         let taskInfoEl = document.createElement("div");
         // give it a class name
@@ -159,10 +160,58 @@ const taskStatusChangeHandler = (event) => {
     }
 }
 
+const dragTaskHandler = (event) => {
+    // get the dragged items attribute for data id
+    let taskId = event.target.getAttribute("data-task-id");
+    // set data task ID in the dataTransfer storage
+    event.dataTransfer.setData("text/plain", taskId);
+}
+
+const dropZoneDragHandler = (event) => {
+    let taskListEl = event.target.closest(".task-list");
+    if (taskListEl) {
+        event.preventDefault();
+        taskListEl.setAttribute("style", "background: rgba(68,233,255,0.7); border-style: dashed;")
+    }
+}
+
+const dropTaskHandler = (event) => {
+    let id = event.dataTransfer.getData("text/plain");
+    let draggableElement = document.querySelector("[data-task-id='" + id + "']");
+    let dropZoneEl = event.target.closest(".task-list");
+    let statusType = dropZoneEl.id;
+    //set status of task based on dropZone id
+    let statusSelectEl = draggableElement.querySelector("select[name='status-change']");
+    if (statusType === "tasks-to-do") {
+        statusSelectEl.selectedIndex = 0;
+    } else if (statusType === "tasks-in-progress") {
+        statusSelectEl.selectedIndex = 1;
+    } else if (statusType === "tasks-completed") {
+        statusSelectEl.selectedIndex = 2;
+    }
+    dropZoneEl.appendChild(draggableElement);
+    dropZoneEl.removeAttribute("style");
+}
+
+const dragLeaveHandler = (event) => {
+    let taskListEl = event.target.closest(".task-list");
+    if (taskListEl) {
+        taskListEl.removeAttribute("style");
+    }
+}
+
 // listens for a submit on the form element
 formEl.addEventListener("submit", taskFormHandler);
 // listens for a click on the task actions
 pageContentEl.addEventListener("click", taskButtonHandler);
 // listens for a value change for the tasks
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+// listens for dragstarts
+pageContentEl.addEventListener("dragstart", dragTaskHandler);
+// listens for dragover events
+pageContentEl.addEventListener("dragover", dropZoneDragHandler);
+// listens for the drop
+pageContentEl.addEventListener("drop", dropTaskHandler);
+// listens for dragleave
+pageContentEl.addEventListener("dragleave", dragLeaveHandler);
 
