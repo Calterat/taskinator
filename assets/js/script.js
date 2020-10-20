@@ -242,16 +242,30 @@ const saveTasks = () => {
 }
 
 const loadTasks = () => {
-    // get task item from local storage
+
+    // New Refactored code doesn't work
+
+    // let savedTasks = localStorage.getItem("tasks");
+
+    // if (!savedTasks) {
+    //     return false;
+    // }
+    // savedTasks = JSON.parse(savedTasks);
+
+    // for (a = 0; a < savedTasks.length; a++) {
+    //     createTaskEl(savedTasks[a]);
+    // }
+
+
     tasks = localStorage.getItem("tasks");
-    // convert tasks from stringified format back into an array of objects
-    if (tasks === null) {
+
+    if (!tasks) {
         tasks = [];
         return false;
     }
+
     tasks = JSON.parse(tasks);
-    console.log(tasks[0].status);
-    // iterates through tasks array and creates task elements on the page from it
+
     for (a =0; a < tasks.length; a++) {
         taskIdCounter = tasks[a].id;
         let listItemEl = document.createElement("li");
@@ -262,7 +276,7 @@ const loadTasks = () => {
         taskInfoEl.className = "task-info";
         taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasks[a].name + "</h3><span class='task-type'>" + tasks[a].type + "</span>";
         listItemEl.appendChild(taskInfoEl);
-        const taskActionsEl = createTaskActions(tasks[a].id);
+        let taskActionsEl = createTaskActions(tasks[a].id);
         listItemEl.appendChild(taskActionsEl);
         if (tasks[a].status === 'to do') {
             listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
@@ -270,13 +284,12 @@ const loadTasks = () => {
         } else if (tasks[a].status === 'in progress') {
             listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
             tasksInProgressEl.appendChild(listItemEl);
-        } else if (tasks[a].status === 'complete') {
+        } else if (tasks[a].status === 'completed') {
             listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
             tasksCompletedEl.appendChild(listItemEl);
         }
-        taskIdCounter++;
-        console.log(listItemEl);
     }
+    taskIdCounter++;
 }
 
 // listens for a submit on the form element
